@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>خزنتي السحابية Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --accent: #00cec9;
+            --dark: #2d3436;
+            --glass: rgba(255, 255, 255, 0.95);
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container { width: 100%; max-width: 1000px; margin-top: 50px; }
+
+        .glass-box {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        h2 { color: var(--dark); text-align: center; margin-bottom: 30px; font-weight: 700; }
+
+        .input-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            background: #f1f2f6;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 40px;
+        }
+
+        input {
+            padding: 12px 15px;
+            border: 2px solid transparent;
+            border-radius: 10px;
+            outline: none;
+            font-family: 'Cairo';
+        }
+
+        .btn-main {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .acc-card {
+            background: white;
+            border-radius: 18px;
+            padding: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            border-bottom: 6px solid var(--primary);
+            transition: 0.3s;
+        }
+
+        .acc-card h3 { margin-top: 0; color: var(--primary); font-size: 1.2rem; border-bottom: 1px solid #f0f0f0; padding-bottom: 10px; }
+
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f9f9f9;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .data-info {
+            font-size: 0.9rem;
+            color: #333;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 80%;
+        }
+
+        .icon-btn {
+            color: #6c5ce7;
+            cursor: pointer;
+            padding: 5px;
+            transition: 0.2s;
+        }
+
+        .icon-btn:hover { transform: scale(1.2); color: #00cec9; }
+
+        .card-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-family: 'Cairo';
+        }
+
+        .edit-btn { background: #fffbeb; color: #b45309; }
+        .del-btn { background: #fef2f2; color: #b91c1c; }
+
+        #main-content { display: none; }
+        #loader { text-align: center; padding: 20px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- شاشة الدخول -->
+        <div id="login-screen" class="glass-box" style="max-width: 450px; margin: auto;">
+            <h2>🔓 دخول الخزنة</h2>
+            <input type="password" id="master-pass" placeholder="كلمة السر للدخول" style="width: 100%; box-sizing: border-box; margin-bottom: 20px;">
+            <button class="btn-main" style="width: 100%;" onclick="checkPass()">دخول آمن</button>
+        </div>
+
+        <!-- المحتوى الرئيسي -->
+        <div id="main-content" class="glass-box">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                <button onclick="location.reload()" class="action-btn del-btn" style="flex: none; padding: 10px 20px;">خروج</button>
+                <h2 style="margin: 0;">مفكرتي السحابية ☁️</h2>
+            </div>
+
+            <div class="input-section">
+                <input type="hidden" id="edit-id">
+                <input type="text" id="site-name" placeholder="اسم الموقع">
+                <input type="text" id="site-email" placeholder="الإيميل / المستخدم">
+                <input type="text" id="site-pass" placeholder="كلمة السر">
+                <button id="main-btn" class="btn-main" onclick="handleSave()">
+                    <i class="fas fa-save"></i> <span id="btn-text">حفظ</span>
+                </button>
+            </div>
+
+            <div id="loader"><i class="fas fa-circle-notch fa-spin fa-2x" style="color: #6c5ce7;"></i></div>
+            <div class="cards-grid" id="accounts-list"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc } 
+        from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC67xHqcheCvjWinFgh3FV6OK8cO0k6wPg",
+            authDomain: "pasward-9328f.firebaseapp.com",
+            projectId: "pasward-9328f",
+            storageBucket: "pasward-9328f.firebasestorage.app",
+            messagingSenderId: "64746748180",
+            appId: "1:64746748180:web:b41796adc5f5c112e5aa01"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const colRef = collection(db, "vault");
+
+        window.checkPass = function() {
+            if(document.getElementById('master-pass').value === "2002") {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('main-content').style.display = 'block';
+                startListening();
+            } else { alert("خطأ!"); }
+        }
+
+        window.handleSave = async function() {
+            const name = document.getElementById('site-name').value;
+            const email = document.getElementById('site-email').value;
+            const pass = document.getElementById('site-pass').value;
+            const editId = document.getElementById('edit-id').value;
+            if(!name || !email || !pass) return;
+            if(editId) {
+                await updateDoc(doc(db, "vault", editId), { name, email, pass });
+                document.getElementById('edit-id').value = '';
+                document.getElementById('btn-text').innerText = "حفظ";
+            } else {
+                await addDoc(colRef, { name, email, pass, time: Date.now() });
+            }
+            document.getElementById('site-name').value = ''; 
+            document.getElementById('site-email').value = ''; 
+            document.getElementById('site-pass').value = ''; 
+        }
+
+        function startListening() {
+            onSnapshot(colRef, (snap) => {
+                document.getElementById('loader').style.display = 'none';
+                const list = document.getElementById('accounts-list');
+                list.innerHTML = '';
+                snap.docs.forEach(d => {
+                    const data = d.data();
+                    list.innerHTML += `
+                        <div class="acc-card">
+                            <h3><i class="fas fa-shield-alt"></i> ${data.name}</h3>
+                            
+                            <div class="data-row">
+                                <div class="data-info"><b>الإيميل:</b> ${data.email}</div>
+                                <i class="fas fa-copy icon-btn" title="نسخ الإيميل" onclick="copyValue('${data.email}', 'الإيميل')"></i>
+                            </div>
+
+                            <div class="data-row">
+                                <div class="data-info"><b>السر:</b> <span id="p-${d.id}">••••••••</span></div>
+                                <div>
+                                    <i class="fas fa-eye icon-btn" title="إظهار" onclick="togglePass('${d.id}', '${data.pass}')"></i>
+                                    <i class="fas fa-copy icon-btn" title="نسخ السر" onclick="copyValue('${data.pass}', 'الباسورد')"></i>
+                                </div>
+                            </div>
+
+                            <div class="card-actions">
+                                <button class="action-btn edit-btn" onclick="prepareEdit('${d.id}', '${data.name}', '${data.email}', '${data.pass}')">تعديل</button>
+                                <button class="action-btn del-btn" onclick="deleteAcc('${d.id}')">حذف</button>
+                            </div>
+                        </div>
+                    `;
+                });
+            });
+        }
+
+        // وظيفة نسخ أي نص
+        window.copyValue = (val, type) => {
+            navigator.clipboard.writeText(val);
+            alert("تم نسخ " + type + " بنجاح!");
+        }
+
+        // وظيفة إظهار/إخفاء الباسورد
+        window.togglePass = (id, realPass) => {
+            const el = document.getElementById('p-' + id);
+            if(el.innerText === '••••••••') {
+                el.innerText = realPass;
+                el.style.color = '#e17055'; // لون مميز عند الظهور
+            } else {
+                el.innerText = '••••••••';
+                el.style.color = '#333';
+            }
+        }
+
+        window.deleteAcc = async (id) => { if(confirm("حذف؟")) await deleteDoc(doc(db, "vault", id)); }
+
+        window.prepareEdit = (id, n, e, p) => {
+            document.getElementById('site-name').value = n;
+            document.getElementById('site-email').value = e;
+            document.getElementById('site-pass').value = p;
+            document.getElementById('edit-id').value = id;
+            document.getElementById('btn-text').innerText = "تحديث الآن";
+            window.scrollTo(0,0);
+        }
+    </script>
+</body>
+</html>
