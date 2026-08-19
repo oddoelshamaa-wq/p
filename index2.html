@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>خزنتي الذكية</title>
+    
+    <!-- أكواد تحويل الموقع لأبلكيشن -->
+    <meta name="theme-color" content="#6c5ce7">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="خزنتي">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --accent: #00cec9;
+            --bg: #0f0c29;
+            --glass: rgba(255, 255, 255, 0.98);
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: radial-gradient(circle at top, #302b63, #0f0c29);
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            color: #333;
+            /* منع السحب لتحديث الصفحة في الموبايل ليعطي شعور التطبيق */
+            overscroll-behavior-y: contain;
+        }
+
+        .container { width: 100%; max-width: 500px; padding: 15px; box-sizing: border-box; }
+
+        /* ستايل الأبلكيشن */
+        .glass-box {
+            background: var(--glass);
+            border-radius: 25px;
+            padding: 25px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+            margin-top: 20px;
+        }
+
+        h2 { text-align: center; font-size: 1.5rem; margin-bottom: 20px; color: var(--bg); }
+
+        /* منطقة المدخلات - مريحة لليد */
+        .input-section {
+            background: #f1f2f6;
+            padding: 15px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        input {
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            font-size: 1rem;
+            outline: none;
+            font-family: 'Cairo';
+            transition: 0.3s;
+        }
+
+        input:focus { border-color: var(--primary); background: white; }
+
+        .btn-main {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(108, 92, 231, 0.3);
+        }
+
+        /* كروت الحسابات - شكل مودرن */
+        .cards-grid { display: flex; flex-direction: column; gap: 15px; }
+
+        .acc-card {
+            background: white;
+            border-radius: 20px;
+            padding: 18px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            border-right: 8px solid var(--primary);
+            animation: slideUp 0.4s ease;
+        }
+
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .acc-card h3 { margin: 0 0 12px 0; font-size: 1.1rem; color: var(--primary); display: flex; align-items: center; gap: 10px; }
+
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f8f9fa;
+            margin: 8px 0;
+            padding: 12px;
+            border-radius: 12px;
+        }
+
+        .data-info { font-size: 0.9rem; font-weight: 600; color: #444; max-width: 70%; overflow: hidden; text-overflow: ellipsis; }
+
+        .icon-btn { color: var(--primary); font-size: 1.2rem; padding: 5px; cursor: pointer; }
+
+        .card-actions { display: flex; gap: 10px; margin-top: 15px; }
+
+        .action-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Cairo';
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+
+        .edit-btn { background: #fff4e5; color: #d4a017; }
+        .del-btn { background: #ffe5e5; color: #d63031; }
+
+        #main-content { display: none; }
+        #loader { text-align: center; padding: 20px; display: none; color: white; }
+        
+        /* شاشة الدخول للموبايل */
+        #login-screen { width: 100%; display: flex; align-items: center; justify-content: center; height: 90vh; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- شاشة الدخول -->
+        <div id="login-screen">
+            <div class="glass-box" style="width: 100%;">
+                <h2>🔒 خزنتي الخاصة</h2>
+                <input type="password" id="master-pass" placeholder="كلمة مرور التطبيق" style="width: 100%; box-sizing: border-box; margin-bottom: 20px; text-align: center;">
+                <button class="btn-main" style="width: 100%;" onclick="checkPass()">دخول</button>
+            </div>
+        </div>
+
+        <!-- المحتوى الرئيسي -->
+        <div id="main-content">
+            <div class="glass-box">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <button onclick="location.reload()" class="action-btn del-btn" style="flex:none; padding: 8px 15px;">خروج</button>
+                    <h2 style="margin: 0;">حساباتي ☁️</h2>
+                </div>
+
+                <div class="input-section">
+                    <input type="hidden" id="edit-id">
+                    <input type="text" id="site-name" placeholder="اسم الموقع (فيسبوك..)">
+                    <input type="text" id="site-email" placeholder="الإيميل / اليوزر">
+                    <input type="text" id="site-pass" placeholder="كلمة السر">
+                    <button id="main-btn" class="btn-main" onclick="handleSave()">حفظ الحساب</button>
+                </div>
+
+                <div id="loader"><i class="fas fa-spinner fa-spin fa-2x"></i></div>
+                <div class="cards-grid" id="accounts-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC67xHqcheCvjWinFgh3FV6OK8cO0k6wPg",
+            authDomain: "pasward-9328f.firebaseapp.com",
+            projectId: "pasward-9328f",
+            storageBucket: "pasward-9328f.firebasestorage.app",
+            messagingSenderId: "64746748180",
+            appId: "1:64746748180:web:b41796adc5f5c112e5aa01"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const colRef = collection(db, "vault");
+
+        window.checkPass = function() {
+            if(document.getElementById('master-pass').value === "2002") {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('main-content').style.display = 'block';
+                document.getElementById('loader').style.display = 'block';
+                startListening();
+            } else { alert("كلمة المرور خطأ!"); }
+        };
+
+        window.handleSave = async function() {
+            const name = document.getElementById('site-name').value;
+            const email = document.getElementById('site-email').value;
+            const pass = document.getElementById('site-pass').value;
+            const editId = document.getElementById('edit-id').value;
+            if(!name || !email || !pass) return alert("اكمل البيانات");
+
+            if(editId) {
+                await updateDoc(doc(db, "vault", editId), { name, email, pass });
+                document.getElementById('edit-id').value = '';
+                document.getElementById('main-btn').innerText = "حفظ الحساب";
+            } else {
+                await addDoc(colRef, { name, email, pass, time: Date.now() });
+            }
+            document.querySelectorAll('input').forEach(i => i.value = '');
+        };
+
+        function startListening() {
+            onSnapshot(colRef, (snap) => {
+                document.getElementById('loader').style.display = 'none';
+                const list = document.getElementById('accounts-list');
+                list.innerHTML = '';
+                snap.docs.forEach(d => {
+                    const data = d.data();
+                    const card = document.createElement('div');
+                    card.className = 'acc-card';
+                    card.innerHTML = `
+                        <h3><i class="fas fa-key"></i> ${data.name}</h3>
+                        <div class="data-row">
+                            <span class="data-info">${data.email}</span>
+                            <i class="fas fa-copy icon-btn btn-copy" data-val="${data.email}"></i>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-info pass-text" data-pass="${data.pass}">••••••••</span>
+                            <div>
+                                <i class="fas fa-eye icon-btn btn-eye"></i>
+                                <i class="fas fa-copy icon-btn btn-copy" data-val="${data.pass}"></i>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="action-btn edit-btn btn-edit" data-id="${d.id}" data-name="${data.name}" data-email="${data.email}" data-pass="${data.pass}">تعديل</button>
+                            <button class="action-btn del-btn btn-del" data-id="${d.id}">حذف</button>
+                        </div>
+                    `;
+                    list.appendChild(card);
+                });
+            });
+        }
+
+        document.addEventListener('click', async (e) => {
+            if (e.target.classList.contains('btn-eye')) {
+                const textEl = e.target.closest('.data-row').querySelector('.pass-text');
+                if (textEl.innerText === '••••••••') {
+                    textEl.innerText = textEl.getAttribute('data-pass');
+                    e.target.classList.replace('fa-eye', 'fa-eye-slash');
+                } else {
+                    textEl.innerText = '••••••••';
+                    e.target.classList.replace('fa-eye-slash', 'fa-eye');
+                }
+            }
+            if (e.target.classList.contains('btn-copy')) {
+                navigator.clipboard.writeText(e.target.getAttribute('data-val'));
+                // اهتزاز بسيط للموبايل عند النسخ لو بيدعم كده
+                if(navigator.vibrate) navigator.vibrate(50);
+                alert("تم النسخ!");
+            }
+            if (e.target.classList.contains('btn-del')) {
+                if(confirm("حذف الحساب؟")) await deleteDoc(doc(db, "vault", e.target.dataset.id));
+            }
+            if (e.target.classList.contains('btn-edit')) {
+                const d = e.target.dataset;
+                document.getElementById('site-name').value = d.name;
+                document.getElementById('site-email').value = d.email;
+                document.getElementById('site-pass').value = d.pass;
+                document.getElementById('edit-id').value = d.id;
+                document.getElementById('main-btn').innerText = "تحديث الحساب";
+                window.scrollTo({top: 0, behavior: 'smooth'});
+            }
+        });
+    </script>
+</body>
+</html>
